@@ -1,7 +1,6 @@
 package com.evernote.example.userstore;
 
 import com.evernote.edam.userstore.UserStore;
-import com.evernote.edam.userstore.UserStore.Client;
 import com.evernote.example.constants.Evernote;
 import com.evernote.example.exception.EvernoteException;
 import com.evernote.thrift.protocol.TBinaryProtocol;
@@ -29,8 +28,7 @@ public class UserStoreFactory {
             throw new EvernoteException(e);
         }
         TBinaryProtocol userStoreProtocol = new TBinaryProtocol(userStoreTrans);
-        UserStore.Client userStoreClient = new Client(userStoreProtocol);
 
-        return userStoreClient;
+        return new UserStore.Client(userStoreProtocol);
     }
 }
