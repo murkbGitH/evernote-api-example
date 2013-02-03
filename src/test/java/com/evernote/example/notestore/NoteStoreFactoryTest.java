@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import com.evernote.edam.notestore.NoteStore;
 import com.evernote.edam.userstore.UserStore;
-import com.evernote.example.user.User;
+import com.evernote.example.user.impl.TestUser;
 import com.evernote.example.userstore.UserStoreFactory;
 
 /**
@@ -41,23 +41,5 @@ public class NoteStoreFactoryTest {
 
         // 検証
         assertThat(actual, notNullValue());
-    }
-
-    /**
-     * テスト用のユーザ。
-     *
-     * @author naotake
-     */
-    private static final class TestUser implements User {
-
-        @Override
-        public String getName() {
-            return "TestUser";
-        }
-
-        @Override
-        public String getDeveloperToken() {
-            return "**************";
-        }
     }
 }
