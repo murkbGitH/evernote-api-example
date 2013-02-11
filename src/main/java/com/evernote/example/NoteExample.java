@@ -113,6 +113,12 @@ public class NoteExample {
         return notes.getNotes();
     }
 
+    /**
+     * 指定された名前のノートブックに含まれる全てのノートを検索する。
+     *
+     * @param notebookName ノートブック名
+     * @return ノート一覧
+     */
     public List<Note> findNotes(String notebookName) {
 
         // UserStore を取得
