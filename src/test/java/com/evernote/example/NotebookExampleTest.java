@@ -72,4 +72,28 @@ public class NotebookExampleTest {
 
         assertThat(actual, nullValue());
     }
+
+    @Test
+    public void ノートブックの作成と削除が行われること() {
+        String notebookName = "DummyNotebook";
+
+        // 事前状態の検証
+        Notebook actual = testee.getNotebook(notebookName);
+        assertThat(actual, nullValue());
+
+        // 作成
+        Notebook registered = testee.createNotebook(notebookName);
+
+        // 検証
+        actual = testee.getNotebook(notebookName);
+        assertThat(actual, notNullValue());
+        assertThat(actual.getGuid(), is(registered.getGuid()));
+
+        // 削除
+        testee.deleteNotebook(notebookName);
+
+        // 事後状態の検証
+        actual = testee.getNotebook(notebookName);
+        assertThat(actual, nullValue());
+    }
 }

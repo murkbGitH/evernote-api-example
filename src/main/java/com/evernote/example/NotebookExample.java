@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.evernote.edam.error.EDAMNotFoundException;
 import com.evernote.edam.error.EDAMSystemException;
 import com.evernote.edam.error.EDAMUserException;
 import com.evernote.edam.notestore.NoteStore;
@@ -13,6 +14,7 @@ import com.evernote.example.exception.EvernoteException;
 import com.evernote.example.notestore.NoteStoreFactory;
 import com.evernote.example.user.User;
 import com.evernote.example.userstore.UserStoreFactory;
+import com.evernote.example.utils.Assert;
 import com.evernote.thrift.TException;
 import com.google.inject.Inject;
 
@@ -83,6 +85,59 @@ public class NotebookExample {
             }
         }
         return result;
+    }
+
+    /**
+     * 指定された名前のノートブックを作成する。
+     *
+     * @param notebookName 作成するノートブックの名前（必須）
+     * @return 作成したノートブック
+     */
+    public Notebook createNotebook(String notebookName) {
+        Assert.notNull("作成するノートブック名", notebookName);
+
+        // UserStore を取得
+        UserStore.Client userStore = userStoreFactory.create();
+
+        // NoteStore を取得
+        NoteStore.Client noteStore = noteStoreFactory.create(user, userStore);
+
+        // ノートブックを作成
+        Notebook notebook = new Notebook();
+        notebook.setName(notebookName);
+
+        try {
+            return noteStore.createNotebook(user.getDeveloperToken(), notebook);
+        } catch (EDAMUserException | EDAMSystemException | TException e) {
+            throw new EvernoteException(e);
+        }
+    }
+
+    /**
+     * 指定された名前のノートブックを削除する。
+     *
+     * @param notebookName 削除するノートブックの名前（必須）
+     */
+    public void deleteNotebook(String notebookName) {
+        Assert.notNull("削除するノートブック名", notebookName);
+
+        // UserStore を取得
+        UserStore.Client userStore = userStoreFactory.create();
+
+        // NoteStore を取得
+        NoteStore.Client noteStore = noteStoreFactory.create(user, userStore);
+
+        // 削除するノートブックを取得
+        Notebook notebook = getNotebook(notebookName);
+
+        // 削除
+        try {
+            noteStore.expungeNotebook(user.getDeveloperToken(),
+                    notebook.getGuid());
+        } catch (EDAMUserException | EDAMSystemException
+                | EDAMNotFoundException | TException e) {
+            throw new EvernoteException(e);
+        }
     }
 
     /**
