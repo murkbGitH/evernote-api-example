@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import com.evernote.edam.type.Note;
 import com.evernote.example.di.JavalibModule;
+import com.evernote.example.exception.NotebookNotFoundException;
 import com.evernote.example.notestore.NoteStoreFactory;
 import com.evernote.example.user.User;
 import com.evernote.example.user.impl.TestUser;
@@ -101,5 +102,32 @@ public class NoteExampleTest {
         // 削除後の状態を検証
         actuals = testee.findNotesOnDefaultNotebook();
         assertThat(actuals, hasSize(47));
+    }
+
+    @Test
+    public void 個別のノートブックに対して指定したタイトルのノートの作成と削除が行われること()
+            throws NotebookNotFoundException {
+
+        // 事前状態の検証
+        String targetNotebookName = "テスト用ノートブック";
+        List<Note> actuals = testee.findNotes(targetNotebookName);
+        assertThat(actuals, hasSize(1));
+
+        // ノートの作成
+        String title = "20130211ノート";
+        Note created = testee.createNote(title, "テスト用のノートです。",
+                targetNotebookName);
+        assertThat(created.getGuid(), notNullValue());
+
+        // 作成後の状態を検証
+        actuals = testee.findNotes(targetNotebookName);
+        assertThat(actuals, hasSize(2));
+
+        // ノートの削除
+        testee.deleteNote(title, targetNotebookName);
+
+        // 削除後の状態を検証
+        actuals = testee.findNotes(targetNotebookName);
+        assertThat(actuals, hasSize(1));
     }
 }

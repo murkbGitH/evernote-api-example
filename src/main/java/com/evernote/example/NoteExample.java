@@ -17,6 +17,7 @@ import com.evernote.edam.type.NoteSortOrder;
 import com.evernote.edam.type.Notebook;
 import com.evernote.edam.userstore.UserStore;
 import com.evernote.example.exception.EvernoteException;
+import com.evernote.example.exception.NotebookNotFoundException;
 import com.evernote.example.notestore.NoteStoreFactory;
 import com.evernote.example.user.User;
 import com.evernote.example.userstore.UserStoreFactory;
@@ -203,6 +204,56 @@ public class NoteExample {
         }
     }
 
+    /**
+     * 指定された名前のノートブックにノートを作成する。
+     *
+     * @param title 作成するノートのタイトル
+     * @param content 作成するノートの内容
+     * @param notebookName 作成対象のノートブック名
+     * @return 作成したノート
+     * @throws NotebookNotFoundException 指定した名前のノートブックが存在しなかった場合
+     */
+    public Note createNote(String title, String content, String notebookName)
+            throws NotebookNotFoundException {
+
+        // UserStore を取得
+        UserStore.Client userStore = userStoreFactory.create();
+
+        // NoteStore を取得
+        NoteStore.Client noteStore = noteStoreFactory.create(user, userStore);
+
+        // ノートブックの一覧を取得
+        List<Notebook> notebooks;
+        try {
+            notebooks = noteStore.listNotebooks(user.getDeveloperToken());
+        } catch (EDAMUserException | EDAMSystemException | TException e) {
+            throw new EvernoteException(e);
+        }
+
+        // ノートブック名が一致するものを取得
+        Notebook targetNotebook = null;
+        for (Notebook notebook : notebooks) {
+            if (StringUtils.equals(notebook.getName(), notebookName)) {
+                targetNotebook = notebook;
+                break;
+            }
+        }
+        if (targetNotebook == null) {
+            throw new NotebookNotFoundException(notebookName);
+        }
+
+        // ノート作成
+        Note note = createNote(title, content);
+        note.setNotebookGuid(targetNotebook.getGuid());
+
+        try {
+            return noteStore.createNote(user.getDeveloperToken(), note);
+        } catch (EDAMUserException | EDAMSystemException
+                | EDAMNotFoundException | TException e) {
+            throw new EvernoteException(e);
+        }
+    }
+
     private Note createNote(String title, String content) {
 
         StringBuilder contentBuffer = new StringBuilder();
@@ -237,6 +288,39 @@ public class NoteExample {
 
         // デフォルトノートブックからノート一覧を取得
         List<Note> notes = findNotesOnDefaultNotebook();
+
+        // 削除
+        for (Note note : notes) {
+            if (!note.getTitle().equals(title)) {
+                continue;
+            }
+
+            try {
+                noteStore.deleteNote(user.getDeveloperToken(), note.getGuid());
+            } catch (EDAMUserException | EDAMSystemException
+                    | EDAMNotFoundException | TException e) {
+                throw new EvernoteException(e);
+            }
+        }
+    }
+
+    /**
+     * ノートブックに含まれる指定したノートを削除する。<br />
+     * 同じタイトルのノートが複数存在していた場合、全てのノートを削除する。
+     *
+     * @param title 削除するノートのタイトル
+     * @param notebookName 削除するノートブック名
+     */
+    public void deleteNote(String title, String notebookName) {
+
+        // UserStore を取得
+        UserStore.Client userStore = userStoreFactory.create();
+
+        // NoteStore を取得
+        NoteStore.Client noteStore = noteStoreFactory.create(user, userStore);
+
+        // 指定した名前のノートブックからノート一覧を取得
+        List<Note> notes = findNotes(notebookName);
 
         // 削除
         for (Note note : notes) {
