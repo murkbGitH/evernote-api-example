@@ -2,6 +2,7 @@ package com.evernote.example;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.util.List;
@@ -76,5 +77,29 @@ public class NoteExampleTest {
         List<Note> actuals = testee.findNotes("Hoge");
 
         assertThat(actuals, empty());
+    }
+
+    @Test
+    public void 指定したタイトルのノートの作成と削除が行われること() {
+
+        // 事前状態の検証
+        List<Note> actuals = testee.findNotesOnDefaultNotebook();
+        assertThat(actuals, hasSize(47));
+
+        // ノートの作成
+        String title = "20130211ノート";
+        Note created = testee.createNoteOnDefaultNotebook(title, "テスト用のノートです。");
+        assertThat(created.getGuid(), notNullValue());
+
+        // 作成後の状態を検証
+        actuals = testee.findNotesOnDefaultNotebook();
+        assertThat(actuals, hasSize(48));
+
+        // ノートの削除
+        testee.deleteNoteOnDefaultNotebook(title);
+
+        // 削除後の状態を検証
+        actuals = testee.findNotesOnDefaultNotebook();
+        assertThat(actuals, hasSize(47));
     }
 }

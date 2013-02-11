@@ -168,6 +168,92 @@ public class NoteExample {
     }
 
     /**
+     * デフォルトノートブックにノートを作成する。
+     *
+     * @param title 作成するノートのタイトル
+     * @param content 作成するノートの内容
+     * @return 作成したノート
+     */
+    public Note createNoteOnDefaultNotebook(String title, String content) {
+
+        // UserStore を取得
+        UserStore.Client userStore = userStoreFactory.create();
+
+        // NoteStore を取得
+        NoteStore.Client noteStore = noteStoreFactory.create(user, userStore);
+
+        // デフォルトノートブックを取得
+        Notebook defaultNotebook;
+        try {
+            defaultNotebook = noteStore.getDefaultNotebook(user
+                    .getDeveloperToken());
+        } catch (EDAMUserException | EDAMSystemException | TException e) {
+            throw new EvernoteException(e);
+        }
+
+        // ノート作成
+        Note note = createNote(title, content);
+        note.setNotebookGuid(defaultNotebook.getGuid());
+
+        try {
+            return noteStore.createNote(user.getDeveloperToken(), note);
+        } catch (EDAMUserException | EDAMSystemException
+                | EDAMNotFoundException | TException e) {
+            throw new EvernoteException(e);
+        }
+    }
+
+    private Note createNote(String title, String content) {
+
+        StringBuilder contentBuffer = new StringBuilder();
+        contentBuffer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        contentBuffer.append(//
+                "<!DOCTYPE en-note SYSTEM "
+                        + "\"http://xml.evernote.com/pub/enml2.dtd\">");
+        contentBuffer.append("<en-note>");
+        contentBuffer.append(content);
+        contentBuffer.append("</en-note>");
+
+        Note note = new Note();
+        note.setTitle(title);
+        note.setContent(contentBuffer.toString());
+
+        return note;
+    }
+
+    /**
+     * デフォルトノートブックに含まれる指定したノートを削除する。<br />
+     * 同じタイトルのノートが複数存在していた場合、全てのノートを削除する。
+     *
+     * @param title 削除するノートのタイトル
+     */
+    public void deleteNoteOnDefaultNotebook(String title) {
+
+        // UserStore を取得
+        UserStore.Client userStore = userStoreFactory.create();
+
+        // NoteStore を取得
+        NoteStore.Client noteStore = noteStoreFactory.create(user, userStore);
+
+        // デフォルトノートブックからノート一覧を取得
+        List<Note> notes = findNotesOnDefaultNotebook();
+
+        // 削除
+        for (Note note : notes) {
+            if (!note.getTitle().equals(title)) {
+                continue;
+            }
+
+            try {
+                noteStore.deleteNote(user.getDeveloperToken(), note.getGuid());
+            } catch (EDAMUserException | EDAMSystemException
+                    | EDAMNotFoundException | TException e) {
+                throw new EvernoteException(e);
+            }
+        }
+    }
+
+    /**
      * {@link UserStoreFactory}を設定する。
      *
      * @param userStoreFactory {@link UserStoreFactory}
