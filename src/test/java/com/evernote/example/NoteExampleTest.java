@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.evernote.edam.notestore.NoteMetadata;
 import com.evernote.edam.type.Note;
 import com.evernote.example.di.JavalibModule;
 import com.evernote.example.exception.NotebookNotFoundException;
@@ -55,6 +56,13 @@ public class NoteExampleTest {
     @Test
     public void 全てのノートを取得できること() {
         List<Note> actuals = testee.findAllNotes();
+
+        assertThat(actuals, hasSize(49));
+    }
+
+    @Test
+    public void 全てのノートメタデータを取得できること() {
+        List<NoteMetadata> actuals = testee.findAllNoteMetadatas();
 
         assertThat(actuals, hasSize(49));
     }

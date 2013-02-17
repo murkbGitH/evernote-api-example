@@ -10,7 +10,9 @@ import com.evernote.edam.error.EDAMSystemException;
 import com.evernote.edam.error.EDAMUserException;
 import com.evernote.edam.notestore.NoteFilter;
 import com.evernote.edam.notestore.NoteList;
+import com.evernote.edam.notestore.NoteMetadata;
 import com.evernote.edam.notestore.NoteStore;
+import com.evernote.edam.notestore.NotesMetadataList;
 import com.evernote.edam.notestore.NotesMetadataResultSpec;
 import com.evernote.edam.type.Note;
 import com.evernote.edam.type.NoteSortOrder;
@@ -55,9 +57,6 @@ public class NoteExample {
         NoteStore.Client noteStore = noteStoreFactory.create(user, userStore);
 
         // ノート一覧を取得する
-        NotesMetadataResultSpec spec = new NotesMetadataResultSpec();
-        spec.setIncludeTitle(true);
-
         NoteFilter filter = new NoteFilter();
         filter.setOrder(NoteSortOrder.CREATED.getValue());
 
@@ -65,6 +64,39 @@ public class NoteExample {
         try {
             notes = noteStore.findNotes(//
                     user.getDeveloperToken(), filter, 0, MAX_NOTES_SIZE);
+        } catch (EDAMUserException | EDAMSystemException
+                | EDAMNotFoundException | TException e) {
+            throw new EvernoteException(e);
+        }
+
+        return notes.getNotes();
+    }
+
+    /**
+     * ユーザが作成した全てのノートメタデータを検索する。
+     *
+     * @return ノートメタデータ一覧
+     */
+    public List<NoteMetadata> findAllNoteMetadatas() {
+
+        // UserStore を取得
+        UserStore.Client userStore = userStoreFactory.create();
+
+        // NoteStore を取得
+        NoteStore.Client noteStore = noteStoreFactory.create(user, userStore);
+
+        // ノート一覧を取得する
+        NotesMetadataResultSpec spec = new NotesMetadataResultSpec();
+        spec.setIncludeTitle(true);
+        spec.setIncludeCreated(true);
+
+        NoteFilter filter = new NoteFilter();
+        filter.setOrder(NoteSortOrder.CREATED.getValue());
+
+        NotesMetadataList notes;
+        try {
+            notes = noteStore.findNotesMetadata(user.getDeveloperToken(),
+                    filter, 0, MAX_NOTES_SIZE, spec);
         } catch (EDAMUserException | EDAMSystemException
                 | EDAMNotFoundException | TException e) {
             throw new EvernoteException(e);
@@ -95,9 +127,6 @@ public class NoteExample {
         }
 
         // ノート一覧を取得する
-        NotesMetadataResultSpec spec = new NotesMetadataResultSpec();
-        spec.setIncludeTitle(true);
-
         NoteFilter filter = new NoteFilter();
         filter.setNotebookGuid(notebook.getGuid());
         filter.setOrder(NoteSortOrder.CREATED.getValue());
@@ -149,9 +178,6 @@ public class NoteExample {
         }
 
         // ノート一覧を取得する
-        NotesMetadataResultSpec spec = new NotesMetadataResultSpec();
-        spec.setIncludeTitle(true);
-
         NoteFilter filter = new NoteFilter();
         filter.setNotebookGuid(result.getGuid());
         filter.setOrder(NoteSortOrder.CREATED.getValue());
