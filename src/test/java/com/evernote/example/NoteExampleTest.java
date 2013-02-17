@@ -113,6 +113,31 @@ public class NoteExampleTest {
     }
 
     @Test
+    public void 指定したタグを付けたノートの作成と削除が行われること() {
+
+        // 事前状態の検証
+        List<Note> actuals = testee.findNotesOnDefaultNotebook();
+        assertThat(actuals, hasSize(47));
+
+        // ノートの作成
+        String title = "20130217ノート";
+        Note created = testee.createNoteOnDefaultNotebook(title, "テスト用のノートです。",
+                "Foo", "Bar");
+        assertThat(created.getGuid(), notNullValue());
+
+        // 作成後の状態を検証
+        actuals = testee.findNotesOnDefaultNotebook();
+        assertThat(actuals, hasSize(48));
+
+        // ノートの削除
+        testee.deleteNoteOnDefaultNotebook(title);
+
+        // 削除後の状態を検証
+        actuals = testee.findNotesOnDefaultNotebook();
+        assertThat(actuals, hasSize(47));
+    }
+
+    @Test
     public void 個別のノートブックに対して指定したタイトルのノートの作成と削除が行われること()
             throws NotebookNotFoundException {
 

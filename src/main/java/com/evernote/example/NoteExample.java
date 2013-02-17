@@ -1,6 +1,7 @@
 package com.evernote.example;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -221,6 +222,45 @@ public class NoteExample {
         // ノート作成
         Note note = createNote(title, content);
         note.setNotebookGuid(defaultNotebook.getGuid());
+
+        try {
+            return noteStore.createNote(user.getDeveloperToken(), note);
+        } catch (EDAMUserException | EDAMSystemException
+                | EDAMNotFoundException | TException e) {
+            throw new EvernoteException(e);
+        }
+    }
+
+    /**
+     * デフォルトノートブックに指定したタグを付与したノートを作成する。
+     *
+     * @param title 作成するノートのタイトル
+     * @param content 作成するノートの名前
+     * @param withTagNames 付与するタグ名
+     * @return 作成したノート
+     */
+    public Note createNoteOnDefaultNotebook(String title, String content,
+            String... withTagNames) {
+
+        // UserStore を取得
+        UserStore.Client userStore = userStoreFactory.create();
+
+        // NoteStore を取得
+        NoteStore.Client noteStore = noteStoreFactory.create(user, userStore);
+
+        // デフォルトノートブックを取得
+        Notebook defaultNotebook;
+        try {
+            defaultNotebook = noteStore.getDefaultNotebook(user
+                    .getDeveloperToken());
+        } catch (EDAMUserException | EDAMSystemException | TException e) {
+            throw new EvernoteException(e);
+        }
+
+        // ノート作成
+        Note note = createNote(title, content);
+        note.setNotebookGuid(defaultNotebook.getGuid());
+        note.setTagNames(Arrays.asList(withTagNames));
 
         try {
             return noteStore.createNote(user.getDeveloperToken(), note);
