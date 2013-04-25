@@ -30,16 +30,16 @@ public class NoteStoreFactory {
         Assert.notNull("ユーザ情報", user);
         Assert.notNull("UserStore", userStore);
 
-        String noteStoreUrl;
-        try {
-            noteStoreUrl = userStore.getNoteStoreUrl(user.getDeveloperToken());
-        } catch (EDAMUserException | EDAMSystemException | TException e) {
-            throw new EvernoteException(e);
-        }
+//        String noteStoreUrl;
+//        try {
+//            noteStoreUrl = userStore.getNoteStoreUrl(user.getDeveloperToken());
+//        } catch (EDAMUserException | EDAMSystemException | TException e) {
+//            throw new EvernoteException(e);
+//        }
 
         THttpClient noteStoreTrans;
         try {
-            noteStoreTrans = new THttpClient(noteStoreUrl);
+            noteStoreTrans = new THttpClient("https://sandbox.evernote.com/shard/s1/notestore");
         } catch (TTransportException e) {
             throw new EvernoteException(e);
         }

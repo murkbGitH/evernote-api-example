@@ -57,14 +57,14 @@ public class NoteExampleTest {
         public void 全てのノートを取得できること() {
             List<Note> actuals = testee.findAllNotes();
 
-            assertThat(actuals, hasSize(49));
+            assertThat(actuals, hasSize(50));
         }
 
         @Test
         public void 全てのノートメタデータを取得できること() {
             List<NoteMetadata> actuals = testee.findAllNoteMetadatas();
 
-            assertThat(actuals, hasSize(49));
+            assertThat(actuals, hasSize(55));
         }
 
         @Test
