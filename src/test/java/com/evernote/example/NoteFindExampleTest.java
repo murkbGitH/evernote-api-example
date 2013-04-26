@@ -8,7 +8,6 @@ import static org.junit.Assert.assertThat;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.evernote.edam.type.Note;
@@ -33,6 +32,8 @@ public class NoteFindExampleTest extends BaseEvernoteTest {
 
         testee.setUserStoreFactory(userStoreFactory);
         testee.setNoteStoreFactory(noteStoreFactory);
+
+        actuals = null;
     }
 
     @Test
@@ -122,7 +123,6 @@ public class NoteFindExampleTest extends BaseEvernoteTest {
         ノートを作成する.tearDown();
     }
 
-    @Ignore("createdによる日付指定がうまくいかへん...")
     @Test
     public void _2013年04月24日に作成されたノートを取得できること() {
         actuals = testee.findByWord("created:20130424 -created:20130425");
@@ -130,5 +130,18 @@ public class NoteFindExampleTest extends BaseEvernoteTest {
         assertThat(actuals.get(0).getTitle(), is("個別ノート1-1"));
         assertThat(actuals.get(1).getTitle(), is("個別ノート2-1"));
         assertThat(actuals.get(2).getTitle(), is("個別ノート2-2"));
+    }
+
+    /**
+     * 本当は作成日が 2013/4/27 の深夜だが、タイムゾーンの関係で 27 日指定だと正しく取得できない。<br />
+     * タイムゾーンが US 基準になってる。
+     */
+    @Test
+    public void _2013年04月27日に作成されたノートを取得できること() {
+        actuals = testee.findByWord("created:20130426 -created:20130427");
+        assertThat(actuals, hasSize(3));
+        assertThat(actuals.get(0).getTitle(), is("個別ノート3-1"));
+        assertThat(actuals.get(1).getTitle(), is("個別ノート3-2"));
+        assertThat(actuals.get(2).getTitle(), is("個別ノート3-3"));
     }
 }
